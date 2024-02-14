@@ -296,6 +296,10 @@
     "hf_hub_url": "mayflowergmbh/intel_orca_dpo_pairs_de",
     "ranking": true
   },
+  "distilabel-math_dpo_de" : {
+    "hf_hub_url": "mayflowergmbh/distilabel-math-preference-dpo-de",
+    "ranking": true
+  },
   "wiki_demo": {
     "file_name": "wiki_demo.txt",
     "file_sha1": "e70375e28eda542a90c68213640cc371898ce181",
