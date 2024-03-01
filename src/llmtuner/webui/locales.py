@@ -477,7 +477,7 @@ LOCALES = {
         },
         "zh": {
             "label": "序列打包",
-            "info": "在指令监督微调阶段将序列打包为相同长度的样本。",
+            "info": "在指令监督微调时将序列打包为等长样本。",
         },
     },
     "upcast_layernorm": {
@@ -508,6 +508,45 @@ LOCALES = {
             "info": "仅训练块扩展后的参数。",
         },
     },
+    "freeze_tab": {
+        "en": {
+            "label": "Freeze tuning configurations",
+        },
+        "ru": {
+            "label": "конфигурации для настройки заморозки",
+        },
+        "zh": {
+            "label": "部分参数微调设置",
+        },
+    },
+    "num_layer_trainable": {
+        "en": {
+            "label": "Trainable layers",
+            "info": "The number of trainable layers.",
+        },
+        "ru": {
+            "label": "Обучаемые слои",
+            "info": "Количество обучаемых слоев.",
+        },
+        "zh": {
+            "label": "可训练层数",
+            "info": "可训练模型层的数量。",
+        },
+    },
+    "name_module_trainable": {
+        "en": {
+            "label": "Trainable modules",
+            "info": "The name of trainable modules. Use commas to separate multiple modules.",
+        },
+        "ru": {
+            "label": "Обучаемые модули",
+            "info": "Название обучаемых модулей. Используйте запятые для разделения нескольких модулей.",
+        },
+        "zh": {
+            "label": "可训练模块",
+            "info": "可训练模块的名称。使用英文逗号分隔多个名称。",
+        },
+    },
     "lora_tab": {
         "en": {
             "label": "LoRA configurations",
@@ -531,6 +570,20 @@ LOCALES = {
         "zh": {
             "label": "LoRA 秩",
             "info": "LoRA 矩阵的秩。",
+        },
+    },
+    "lora_alpha": {
+        "en": {
+            "label": "LoRA Alpha",
+            "info": "Lora scaling coefficient.",
+        },
+        "ru": {
+            "label": "LoRA Alpha",
+            "info": "Коэффициент масштабирования LoRA.",
+        },
+        "zh": {
+            "label": "LoRA 缩放系数",
+            "info": "LoRA 缩放系数大小。",
         },
     },
     "lora_dropout": {
@@ -561,6 +614,48 @@ LOCALES = {
             "info": "应用 LoRA 的目标模块名称。使用英文逗号分隔多个名称。",
         },
     },
+    "use_rslora": {
+        "en": {
+            "label": "Use rslora",
+            "info": "Use the rank stabilization scaling factor for LoRA layer.",
+        },
+        "ru": {
+            "label": "Использовать rslora",
+            "info": "Использовать коэффициент масштабирования стабилизации ранга для слоя LoRA.",
+        },
+        "zh": {
+            "label": "使用 rslora",
+            "info": "对 LoRA 层使用秩稳定缩放方法。",
+        },
+    },
+    "use_dora": {
+        "en": {
+            "label": "Use DoRA",
+            "info": "Use weight-decomposed LoRA.",
+        },
+        "ru": {
+            "label": "Используйте DoRA",
+            "info": "Используйте LoRA с декомпозицией весов.",
+        },
+        "zh": {
+            "label": "使用 DoRA",
+            "info": "使用权重分解的 LoRA。",
+        },
+    },
+    "create_new_adapter": {
+        "en": {
+            "label": "Create new adapter",
+            "info": "Create a new adapter with randomly initialized weight upon the existing one.",
+        },
+        "ru": {
+            "label": "Создать новый адаптер",
+            "info": "Создать новый адаптер с случайной инициализацией веса на основе существующего.",
+        },
+        "zh": {
+            "label": "新建适配器",
+            "info": "在现有的适配器上创建一个随机初始化后的新适配器。",
+        },
+    },
     "additional_target": {
         "en": {
             "label": "Additional modules (optional)",
@@ -576,34 +671,6 @@ LOCALES = {
         "zh": {
             "label": "附加模块（非必填）",
             "info": "除 LoRA 层以外的可训练模块名称。使用英文逗号分隔多个名称。",
-        },
-    },
-    "use_rslora": {
-        "en": {
-            "label": "Use rslora",
-            "info": "Use the rank stabilization scaling factor for LoRA layer.",
-        },
-        "ru": {
-            "label": "Использовать rslora",
-            "info": "Использовать коэффициент масштабирования стабилизации ранга для слоя LoRA.",
-        },
-        "zh": {
-            "label": "使用 rslora",
-            "info": "对 LoRA 层使用秩稳定缩放方法。",
-        },
-    },
-    "create_new_adapter": {
-        "en": {
-            "label": "Create new adapter",
-            "info": "Create a new adapter with randomly initialized weight upon the existing one.",
-        },
-        "ru": {
-            "label": "Создать новый адаптер",
-            "info": "Создать новый адаптер с случайной инициализацией веса на основе существующего.",
-        },
-        "zh": {
-            "label": "新建适配器",
-            "info": "在现有的适配器上创建一个随机初始化后的新适配器。",
         },
     },
     "rlhf_tab": {
@@ -772,6 +839,17 @@ LOCALES = {
             "value": "模型未加载，请先加载模型。",
         },
     },
+    "role": {
+        "en": {
+            "label": "Role",
+        },
+        "ru": {
+            "label": "Роль",
+        },
+        "zh": {
+            "label": "角色",
+        },
+    },
     "system": {
         "en": {
             "placeholder": "System prompt (optional)",
@@ -816,17 +894,6 @@ LOCALES = {
             "value": "提交",
         },
     },
-    "clear_btn": {
-        "en": {
-            "value": "Clear history",
-        },
-        "ru": {
-            "value": "Очистить историю",
-        },
-        "zh": {
-            "value": "清空历史",
-        },
-    },
     "max_length": {
         "en": {
             "label": "Maximum length",
@@ -869,6 +936,17 @@ LOCALES = {
         },
         "zh": {
             "label": "温度系数",
+        },
+    },
+    "clear_btn": {
+        "en": {
+            "value": "Clear history",
+        },
+        "ru": {
+            "value": "Очистить историю",
+        },
+        "zh": {
+            "value": "清空历史",
         },
     },
     "max_shard_size": {
@@ -1015,6 +1093,11 @@ ALERTS = {
         "en": "Invalid JSON schema.",
         "ru": "Неверная схема JSON.",
         "zh": "Json 格式错误。",
+    },
+    "warn_no_cuda": {
+        "en": "CUDA environment was not detected.",
+        "ru": "Среда CUDA не обнаружена.",
+        "zh": "未检测到 CUDA 环境。",
     },
     "info_aborting": {
         "en": "Aborted, wait for terminating...",
