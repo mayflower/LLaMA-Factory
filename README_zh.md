@@ -71,7 +71,7 @@ https://github.com/hiyouga/LLaMA-Factory/assets/16256802/ec36a9dd-37f4-4f72-81bd
 
 [24/02/28] 我们支持了 **[DoRA](https://arxiv.org/abs/2402.09353)** 微调。请使用 `--use_dora` 参数进行 DoRA 微调。
 
-[24/02/15] 我们支持了 [LLaMA Pro](https://github.com/TencentARC/LLaMA-Pro) 提出的**块扩展**方法。详细用法请参照 `tests/llama_pro.py`。
+[24/02/15] 我们支持了 [LLaMA Pro](https://github.com/TencentARC/LLaMA-Pro) 提出的**块扩展**方法。详细用法请参照 `scripts/llama_pro.py`。
 
 [24/02/05] Qwen1.5（Qwen2 测试版）系列模型已在 LLaMA-Factory 中实现微调支持。详情请查阅该[博客页面](https://qwenlm.github.io/zh/blog/qwen1.5/)。
 
@@ -143,6 +143,8 @@ https://github.com/hiyouga/LLaMA-Factory/assets/16256802/ec36a9dd-37f4-4f72-81bd
 > 对于所有“基座”（Base）模型，`--template` 参数可以是 `default`, `alpaca`, `vicuna` 等任意值。但“对话”（Chat）模型请务必使用**对应的模板**。
 
 项目所支持模型的完整列表请参阅 [constants.py](src/llmtuner/extras/constants.py)。
+
+您也可以在 [template.py](src/llmtuner/data/template.py) 中添加自己的对话模板。
 
 ## 训练方法
 
@@ -472,8 +474,7 @@ CUDA_VISIBLE_DEVICES=0 python src/train_bash.py \
 #### 使用 Huggingface Accelerate
 
 ```bash
-accelerate config # 首先配置分布式环境
-accelerate launch src/train_bash.py # 参数同上
+accelerate launch --config_file config.yaml src/train_bash.py # 参数同上
 ```
 
 <details><summary>LoRA 训练的 Accelerate 配置示例</summary>
@@ -499,10 +500,13 @@ use_cpu: false
 
 </details>
 
+> [!TIP]
+> 我们推荐使用 Accelerate 进行 LoRA 训练。
+
 #### 使用 DeepSpeed
 
 ```bash
-deepspeed --num_gpus 8 --master_port=9901 src/train_bash.py \
+deepspeed --num_gpus 8 src/train_bash.py \
     --deepspeed ds_config.json \
     ... # 参数同上
 ```
@@ -519,24 +523,31 @@ deepspeed --num_gpus 8 --master_port=9901 src/train_bash.py \
   "fp16": {
     "enabled": "auto",
     "loss_scale": 0,
-    "initial_scale_power": 16,
     "loss_scale_window": 1000,
+    "initial_scale_power": 16,
     "hysteresis": 2,
     "min_loss_scale": 1
+  },
+  "bf16": {
+    "enabled": "auto"
   },
   "zero_optimization": {
     "stage": 2,
     "allgather_partitions": true,
     "allgather_bucket_size": 5e8,
+    "overlap_comm": true,
     "reduce_scatter": true,
     "reduce_bucket_size": 5e8,
-    "overlap_comm": false,
-    "contiguous_gradients": true
+    "contiguous_gradients": true,
+    "round_robin_gradients": true
   }
 }
 ```
 
 </details>
+
+> [!TIP]
+> 更多训练脚本请查看 [examples](examples)。
 
 ### 合并 LoRA 权重并导出模型
 
@@ -555,7 +566,9 @@ python src/export_model.py \
 > 尚不支持量化模型的 LoRA 权重合并及导出。
 
 > [!TIP]
-> 合并 LoRA 权重之后可再次使用 `--export_quantization_bit 4` 和 `--export_quantization_dataset data/c4_demo.json` 量化模型。
+> 仅使用 `--model_name_or_path path_to_export` 来加载导出后的模型。
+> 
+> 合并 LoRA 权重之后可再次使用 `--export_quantization_bit 4` 和 `--export_quantization_dataset data/c4_demo.json` 基于 AutoGPTQ 量化模型。
 
 ### 使用 OpenAI 风格 API 推理
 
