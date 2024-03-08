@@ -113,7 +113,7 @@ class Runner:
             quantization_bit=int(get("top.quantization_bit")) if get("top.quantization_bit") in ["8", "4"] else None,
             template=get("top.template"),
             rope_scaling=get("top.rope_scaling") if get("top.rope_scaling") in ["linear", "dynamic"] else None,
-            flash_attn=(get("top.booster") == "flash_attn"),
+            flash_attn=(get("top.booster") == "flashattn"),
             use_unsloth=(get("top.booster") == "unsloth"),
             dataset_dir=get("train.dataset_dir"),
             dataset=",".join(get("train.dataset")),
@@ -129,13 +129,17 @@ class Runner:
             save_steps=get("train.save_steps"),
             warmup_steps=get("train.warmup_steps"),
             neftune_noise_alpha=get("train.neftune_alpha") or None,
+            optim=get("train.optim"),
             resize_vocab=get("train.resize_vocab"),
             sft_packing=get("train.sft_packing"),
             upcast_layernorm=get("train.upcast_layernorm"),
             use_llama_pro=get("train.use_llama_pro"),
+            shift_attn=get("train.shift_attn"),
+            use_galore=get("train.use_galore"),
             output_dir=get_save_dir(get("top.model_name"), get("top.finetuning_type"), get("train.output_dir")),
             fp16=(get("train.compute_type") == "fp16"),
             bf16=(get("train.compute_type") == "bf16"),
+            pure_bf16=(get("train.compute_type") == "pure_bf16"),
         )
         args["disable_tqdm"] = True
 
@@ -175,6 +179,12 @@ class Runner:
             args["per_device_eval_batch_size"] = args["per_device_train_batch_size"]
             args["load_best_model_at_end"] = args["stage"] not in ["rm", "ppo"]
 
+        if args["use_galore"]:
+            args["galore_rank"] = get("train.galore_rank")
+            args["galore_update_interval"] = get("train.galore_update_interval")
+            args["galore_scale"] = get("train.galore_scale")
+            args["galore_target"] = get("train.galore_target")
+
         return args
 
     def _parse_eval_args(self, data: Dict[Component, Any]) -> Dict[str, Any]:
@@ -200,7 +210,7 @@ class Runner:
             quantization_bit=int(get("top.quantization_bit")) if get("top.quantization_bit") in ["8", "4"] else None,
             template=get("top.template"),
             rope_scaling=get("top.rope_scaling") if get("top.rope_scaling") in ["linear", "dynamic"] else None,
-            flash_attn=(get("top.booster") == "flash_attn"),
+            flash_attn=(get("top.booster") == "flashattn"),
             use_unsloth=(get("top.booster") == "unsloth"),
             dataset_dir=get("eval.dataset_dir"),
             dataset=",".join(get("eval.dataset")),
