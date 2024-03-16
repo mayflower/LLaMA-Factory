@@ -480,18 +480,18 @@ LOCALES = {
             "info": "更改分词器词表和嵌入层的大小。",
         },
     },
-    "sft_packing": {
+    "packing": {
         "en": {
             "label": "Pack sequences",
-            "info": "Pack sequences into samples of fixed length in supervised fine-tuning.",
+            "info": "Pack sequences into samples of fixed length.",
         },
         "ru": {
             "label": "Упаковка последовательностей",
-            "info": "Упаковка последовательностей в образцы фиксированной длины при контролируемой тонкой настройке.",
+            "info": "Упаковка последовательностей в образцы фиксированной длины.",
         },
         "zh": {
             "label": "序列打包",
-            "info": "在指令监督微调时将序列打包为等长样本。",
+            "info": "将序列打包为等长样本。",
         },
     },
     "upcast_layernorm": {
@@ -746,15 +746,15 @@ LOCALES = {
     "reward_model": {
         "en": {
             "label": "Reward model",
-            "info": "Adapter of the reward model for PPO training. (Needs to refresh adapters)",
+            "info": "Adapter of the reward model for PPO training.",
         },
         "ru": {
             "label": "Модель вознаграждения",
-            "info": "Адаптер модели вознаграждения для обучения PPO. (Необходимо обновить адаптеры)",
+            "info": "Адаптер модели вознаграждения для обучения PPO.",
         },
         "zh": {
             "label": "奖励模型",
-            "info": "PPO 训练中奖励模型的适配器路径。（需要刷新适配器）",
+            "info": "PPO 训练中奖励模型的适配器路径。",
         },
     },
     "galore_tab": {
@@ -1199,7 +1199,12 @@ ALERTS = {
     "err_no_adapter": {
         "en": "Please select an adapter.",
         "ru": "Пожалуйста, выберите адаптер.",
-        "zh": "请选择一个适配器。",
+        "zh": "请选择适配器。",
+    },
+    "err_no_reward_model": {
+        "en": "Please select a reward model.",
+        "ru": "Пожалуйста, выберите модель вознаграждения.",
+        "zh": "请选择奖励模型。",
     },
     "err_no_export_dir": {
         "en": "Please provide export dir.",

@@ -1,5 +1,4 @@
-from contextlib import nullcontext
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Tuple
 
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 from trl import AutoModelForCausalLMWithValueHead
@@ -53,8 +52,8 @@ def load_model(
     tokenizer: "PreTrainedTokenizer",
     model_args: "ModelArguments",
     finetuning_args: "FinetuningArguments",
-    is_trainable: Optional[bool] = False,
-    add_valuehead: Optional[bool] = False,
+    is_trainable: bool = False,
+    add_valuehead: bool = False,
 ) -> "PreTrainedModel":
     r"""
     Loads pretrained model. Must after load_tokenizer.
@@ -87,17 +86,7 @@ def load_model(
             logger.warning("Unsloth does not support loading adapters.")
 
     if model is None:
-        model_init_context = nullcontext()
-        if model_args.aqlm_optimization and getattr(config, "quantization_config", None):
-            quantization_config: Dict[str, Any] = getattr(config, "quantization_config", None)
-            if quantization_config.get("quant_method", None) == "aqlm":
-                import aqlm  # type: ignore
-
-                model_init_context = aqlm.optimize_for_training()
-                logger.info("Optimize for AQLM training.")  # https://github.com/Vahe1994/AQLM/issues/38
-
-        with model_init_context:
-            model = AutoModelForCausalLM.from_pretrained(model_args.model_name_or_path, config=config, **init_kwargs)
+        model = AutoModelForCausalLM.from_pretrained(model_args.model_name_or_path, config=config, **init_kwargs)
 
     patch_model(model, tokenizer, model_args, is_trainable)
     register_autoclass(config, model, tokenizer)
@@ -120,7 +109,6 @@ def load_model(
 
     if not is_trainable:
         model.requires_grad_(False)
-        model = model.to(model_args.compute_dtype) if not getattr(model, "quantization_method", None) else model
         model.eval()
     else:
         model.train()
@@ -148,8 +136,8 @@ def load_model(
 def load_model_and_tokenizer(
     model_args: "ModelArguments",
     finetuning_args: "FinetuningArguments",
-    is_trainable: Optional[bool] = False,
-    add_valuehead: Optional[bool] = False,
+    is_trainable: bool = False,
+    add_valuehead: bool = False,
 ) -> Tuple["PreTrainedModel", "PreTrainedTokenizer"]:
     r"""
     Loads pretrained model and tokenizer.

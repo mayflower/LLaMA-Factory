@@ -4,7 +4,7 @@ import gradio as gr
 from transformers.trainer_utils import SchedulerType
 
 from ...extras.constants import TRAINING_STAGES
-from ..common import DEFAULT_DATA_DIR, list_adapters, list_dataset
+from ..common import DEFAULT_DATA_DIR, autoset_packing, list_adapters, list_dataset
 from ..components.data import create_preview_box
 from ..utils import gen_plot
 
@@ -27,7 +27,6 @@ def create_train_tab(engine: "Engine") -> Dict[str, "Component"]:
         dataset = gr.Dropdown(multiselect=True, scale=4)
         preview_elems = create_preview_box(dataset_dir, dataset)
 
-    training_stage.change(list_dataset, [dataset_dir, training_stage], [dataset], queue=False)
     dataset_dir.change(list_dataset, [dataset_dir, training_stage], [dataset], queue=False)
 
     input_elems.update({training_stage, dataset_dir, dataset})
@@ -79,7 +78,7 @@ def create_train_tab(engine: "Engine") -> Dict[str, "Component"]:
 
         with gr.Row():
             resize_vocab = gr.Checkbox()
-            sft_packing = gr.Checkbox()
+            packing = gr.Checkbox()
             upcast_layernorm = gr.Checkbox()
             use_llama_pro = gr.Checkbox()
             shift_attn = gr.Checkbox()
@@ -92,7 +91,7 @@ def create_train_tab(engine: "Engine") -> Dict[str, "Component"]:
             neftune_alpha,
             optim,
             resize_vocab,
-            sft_packing,
+            packing,
             upcast_layernorm,
             use_llama_pro,
             shift_attn,
@@ -107,7 +106,7 @@ def create_train_tab(engine: "Engine") -> Dict[str, "Component"]:
             neftune_alpha=neftune_alpha,
             optim=optim,
             resize_vocab=resize_vocab,
-            sft_packing=sft_packing,
+            packing=packing,
             upcast_layernorm=upcast_layernorm,
             use_llama_pro=use_llama_pro,
             shift_attn=shift_attn,
@@ -117,7 +116,7 @@ def create_train_tab(engine: "Engine") -> Dict[str, "Component"]:
     with gr.Accordion(label="Freeze config", open=False) as freeze_tab:
         with gr.Row():
             num_layer_trainable = gr.Slider(value=3, minimum=1, maximum=128, step=1, scale=2)
-            name_module_trainable = gr.Textbox(scale=3)
+            name_module_trainable = gr.Textbox(value="all", scale=3)
 
     input_elems.update({num_layer_trainable, name_module_trainable})
     elem_dict.update(
@@ -160,20 +159,17 @@ def create_train_tab(engine: "Engine") -> Dict[str, "Component"]:
         with gr.Row():
             dpo_beta = gr.Slider(value=0.1, minimum=0, maximum=1, step=0.01, scale=1)
             dpo_ftx = gr.Slider(value=0, minimum=0, maximum=10, step=0.01, scale=1)
-            reward_model = gr.Dropdown(scale=2, allow_custom_value=True)
-            refresh_btn = gr.Button(scale=1)
+            reward_model = gr.Dropdown(multiselect=True, allow_custom_value=True, scale=2)
 
-    refresh_btn.click(
+    training_stage.change(list_dataset, [dataset_dir, training_stage], [dataset], queue=False).then(
         list_adapters,
         [engine.manager.get_elem_by_name("top.model_name"), engine.manager.get_elem_by_name("top.finetuning_type")],
         [reward_model],
         queue=False,
-    )
+    ).then(autoset_packing, [training_stage], [packing], queue=False)
 
     input_elems.update({dpo_beta, dpo_ftx, reward_model})
-    elem_dict.update(
-        dict(rlhf_tab=rlhf_tab, dpo_beta=dpo_beta, dpo_ftx=dpo_ftx, reward_model=reward_model, refresh_btn=refresh_btn)
-    )
+    elem_dict.update(dict(rlhf_tab=rlhf_tab, dpo_beta=dpo_beta, dpo_ftx=dpo_ftx, reward_model=reward_model))
 
     with gr.Accordion(label="GaLore config", open=False) as galore_tab:
         with gr.Row():

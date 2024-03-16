@@ -2,7 +2,7 @@ import logging
 import os
 import time
 from threading import Thread
-from typing import TYPE_CHECKING, Any, Dict, Generator, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Generator, Tuple
 
 import gradio as gr
 import transformers
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 
 class Runner:
-    def __init__(self, manager: "Manager", demo_mode: Optional[bool] = False) -> None:
+    def __init__(self, manager: "Manager", demo_mode: bool = False) -> None:
         self.manager = manager
         self.demo_mode = demo_mode
         """ Resume """
@@ -70,6 +70,12 @@ class Runner:
 
         if not from_preview and get_device_count() > 1:
             return ALERTS["err_device_count"][lang]
+
+        if do_train:
+            stage = TRAINING_STAGES[get("train.training_stage")]
+            reward_model = get("train.reward_model")
+            if stage == "ppo" and not reward_model:
+                return ALERTS["err_no_reward_model"][lang]
 
         if not from_preview and not is_torch_cuda_available():
             gr.Warning(ALERTS["warn_no_cuda"][lang])
@@ -131,7 +137,7 @@ class Runner:
             neftune_noise_alpha=get("train.neftune_alpha") or None,
             optim=get("train.optim"),
             resize_vocab=get("train.resize_vocab"),
-            sft_packing=get("train.sft_packing"),
+            packing=get("train.packing"),
             upcast_layernorm=get("train.upcast_layernorm"),
             use_llama_pro=get("train.use_llama_pro"),
             shift_attn=get("train.shift_attn"),
@@ -163,8 +169,11 @@ class Runner:
                 args["num_layer_trainable"] = int(get("train.num_layer_trainable"))
 
         if args["stage"] == "ppo":
-            args["reward_model"] = get_save_dir(
-                get("top.model_name"), get("top.finetuning_type"), get("train.reward_model")
+            args["reward_model"] = ",".join(
+                [
+                    get_save_dir(get("top.model_name"), get("top.finetuning_type"), adapter)
+                    for adapter in get("train.reward_model")
+                ]
             )
             args["reward_model_type"] = "lora" if args["finetuning_type"] == "lora" else "full"
 

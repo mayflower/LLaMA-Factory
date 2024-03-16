@@ -9,8 +9,8 @@ class FreezeArguments:
     Arguments pertaining to the freeze (partial-parameter) training.
     """
 
-    name_module_trainable: Optional[str] = field(
-        default=None,
+    name_module_trainable: str = field(
+        default="all",
         metadata={
             "help": """Name of trainable modules for partial-parameter (freeze) fine-tuning. \
                     Use commas to separate multiple modules. \
@@ -23,7 +23,7 @@ class FreezeArguments:
         },
     )
     num_layer_trainable: int = field(
-        default=3,
+        default=2,
         metadata={"help": "The number of trainable layers for partial-parameter (freeze) fine-tuning."},
     )
 
@@ -52,12 +52,12 @@ class LoraArguments:
         default=8,
         metadata={"help": "The intrinsic dimension for LoRA fine-tuning."},
     )
-    lora_target: Optional[str] = field(
-        default=None,
+    lora_target: str = field(
+        default="all",
         metadata={
             "help": """Name(s) of target modules to apply LoRA. \
                     Use commas to separate multiple modules. \
-                    Use "all" to specify all the available modules. \
+                    Use "all" to specify all the linear modules. \
                     LLaMA choices: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"], \
                     BLOOM & Falcon & ChatGLM choices: ["query_key_value", "dense", "dense_h_to_4h", "dense_4h_to_h"], \
                     Baichuan choices: ["W_pack", "o_proj", "gate_proj", "up_proj", "down_proj"], \
@@ -65,6 +65,14 @@ class LoraArguments:
                     InternLM2 choices: ["wqkv", "wo", "w1", "w2", "w3"], \
                     Others choices: the same as LLaMA."""
         },
+    )
+    loraplus_lr_ratio: Optional[float] = field(
+        default=None,
+        metadata={"help": "LoRA plus learning rate ratio (lr_B / lr_A)."},
+    )
+    loraplus_lr_embedding: float = field(
+        default=1e-6,
+        metadata={"help": "LoRA plus learning rate for lora embedding layers."},
     )
     use_rslora: bool = field(
         default=False,
@@ -163,8 +171,11 @@ class GaloreArguments:
         metadata={"help": "Whether or not to use gradient low-Rank projection."},
     )
     galore_target: str = field(
-        default="mlp,attn",
-        metadata={"help": "Name(s) of modules to apply GaLore. Use commas to separate multiple modules."},
+        default="all",
+        metadata={
+            "help": """Name(s) of modules to apply GaLore. Use commas to separate multiple modules. \
+                    Use "all" to specify all the linear modules."""
+        },
     )
     galore_rank: int = field(
         default=16,
@@ -181,6 +192,10 @@ class GaloreArguments:
     galore_proj_type: Literal["std", "reverse_std", "right", "left", "full"] = field(
         default="std",
         metadata={"help": "Type of GaLore projection."},
+    )
+    galore_layerwise: bool = field(
+        default=False,
+        metadata={"help": "Whether or not to enable layer-wise update to further save memory."},
     )
 
 
@@ -221,6 +236,7 @@ class FinetuningArguments(FreezeArguments, LoraArguments, RLHFArguments, GaloreA
         self.lora_alpha = self.lora_alpha or self.lora_rank * 2
         self.lora_target = split_arg(self.lora_target)
         self.additional_target = split_arg(self.additional_target)
+        self.galore_target = split_arg(self.galore_target)
 
         assert self.finetuning_type in ["lora", "freeze", "full"], "Invalid fine-tuning method."
         assert self.ref_model_quantization_bit in [None, 8, 4], "We only accept 4-bit or 8-bit quantization."
