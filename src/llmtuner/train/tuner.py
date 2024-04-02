@@ -9,6 +9,7 @@ from ..extras.logging import get_logger
 from ..hparams import get_infer_args, get_train_args
 from ..model import load_model_and_tokenizer
 from .dpo import run_dpo
+from .orpo import run_orpo
 from .ppo import run_ppo
 from .pt import run_pt
 from .rm import run_rm
@@ -36,6 +37,8 @@ def run_exp(args: Optional[Dict[str, Any]] = None, callbacks: Optional[List["Tra
         run_ppo(model_args, data_args, training_args, finetuning_args, generating_args, callbacks)
     elif finetuning_args.stage == "dpo":
         run_dpo(model_args, data_args, training_args, finetuning_args, callbacks)
+    elif finetuning_args.stage == "orpo":
+        run_orpo(model_args, data_args, training_args, finetuning_args, callbacks)
     else:
         raise ValueError("Unknown task.")
 
@@ -63,14 +66,6 @@ def export_model(args: Optional[Dict[str, Any]] = None):
         setattr(model.config, "torch_dtype", output_dtype)
         for param in model.parameters():
             param.data = param.data.to(output_dtype)
-
-    gen_config = model.generation_config  # check and fix generation config
-    if not gen_config.do_sample and (
-        (gen_config.temperature is not None and gen_config.temperature != 1.0)
-        or (gen_config.top_p is not None and gen_config.top_p != 1.0)
-        or (gen_config.typical_p is not None and gen_config.typical_p != 1.0)
-    ):
-        gen_config.do_sample = True
 
     model.save_pretrained(
         save_directory=model_args.export_dir,

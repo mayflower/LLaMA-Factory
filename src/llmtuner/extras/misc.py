@@ -64,8 +64,9 @@ def check_dependencies() -> None:
         require_version("transformers>=4.37.2", "To fix: pip install transformers>=4.37.2")
         require_version("datasets>=2.14.3", "To fix: pip install datasets>=2.14.3")
         require_version("accelerate>=0.27.2", "To fix: pip install accelerate>=0.27.2")
-        require_version("peft>=0.9.0", "To fix: pip install peft>=0.9.0")
+        require_version("peft>=0.10.0", "To fix: pip install peft>=0.10.0")
         require_version("trl>=0.8.1", "To fix: pip install trl>=0.8.1")
+        require_version("gradio>4.0.0,<=4.21.0", "To fix: pip install gradio==4.21.0")
 
 
 def count_parameters(model: torch.nn.Module) -> Tuple[int, int]:
@@ -192,6 +193,18 @@ def infer_optim_dtype(model_dtype: torch.dtype) -> torch.dtype:
         return torch.float32
 
 
+def is_path_available(path: os.PathLike) -> bool:
+    r"""
+    Checks if the path is empty or not exist.
+    """
+    if not os.path.exists(path):
+        return True
+    elif os.path.isdir(path) and not os.listdir(path):
+        return True
+    else:
+        return False
+
+
 def torch_gc() -> None:
     r"""
     Collects GPU memory.
@@ -202,17 +215,15 @@ def torch_gc() -> None:
         torch.cuda.ipc_collect()
 
 
-def try_download_model_from_ms(model_args: "ModelArguments") -> None:
+def try_download_model_from_ms(model_args: "ModelArguments") -> str:
     if not use_modelscope() or os.path.exists(model_args.model_name_or_path):
-        return
+        return model_args.model_name_or_path
 
     try:
         from modelscope import snapshot_download
 
         revision = "master" if model_args.model_revision == "main" else model_args.model_revision
-        model_args.model_name_or_path = snapshot_download(
-            model_args.model_name_or_path, revision=revision, cache_dir=model_args.cache_dir
-        )
+        return snapshot_download(model_args.model_name_or_path, revision=revision, cache_dir=model_args.cache_dir)
     except ImportError:
         raise ImportError("Please install modelscope via `pip install modelscope -U`")
 
