@@ -238,6 +238,30 @@
   "oasst_de": {
     "hf_hub_url": "mayflowergmbh/oasst_de"
   },
+  "hermes_de": {
+    "hf_hub_url": "jphme/hermes_german_experimental",
+    "columns": {
+      "prompt": "instruction",
+      "query": "input",
+      "response": "output"
+    }
+  },
+  "slimorca_de": {
+    "hf_hub_url": "jphme/slimorca_dedup_german_experimental",
+    "columns": {
+      "prompt": "system",
+      "query": "instruction",
+      "response": "response"
+    }
+  },
+  "synthia_de": {
+    "hf_hub_url": "jphme/synthia_german_experimental",
+    "columns": {
+       "prompt": "system",
+       "query": "instruction",
+       "response": "response"
+    }
+  },
   "dolly_15k_de": {
     "hf_hub_url": "mayflowergmbh/dolly-15k_de"
   },
