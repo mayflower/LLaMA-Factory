@@ -172,6 +172,19 @@ register_model_group(
 
 register_model_group(
     models={
+        "Breeze-7B": {
+            DownloadSource.DEFAULT: "MediaTek-Research/Breeze-7B-Base-v1_0",
+        },
+        "Breeze-7B-Chat": {
+            DownloadSource.DEFAULT: "MediaTek-Research/Breeze-7B-Instruct-v1_0",
+        },
+    },
+    template="breeze",
+)
+
+
+register_model_group(
+    models={
         "ChatGLM2-6B-Chat": {
             DownloadSource.DEFAULT: "THUDM/chatglm2-6b",
             DownloadSource.MODELSCOPE: "ZhipuAI/chatglm2-6b",
@@ -226,6 +239,28 @@ register_model_group(
         },
     },
     template="llama2_zh",
+)
+
+
+register_model_group(
+    models={
+        "CommandR-35B-Chat": {
+            DownloadSource.DEFAULT: "CohereForAI/c4ai-command-r-v01",
+            DownloadSource.MODELSCOPE: "AI-ModelScope/c4ai-command-r-v01",
+        },
+        "CommandR-Plus-104B-Chat": {
+            DownloadSource.DEFAULT: "CohereForAI/c4ai-command-r-plus",
+            DownloadSource.MODELSCOPE: "AI-ModelScope/c4ai-command-r-plus",
+        },
+        "CommandR-35B-4bit-Chat": {
+            DownloadSource.DEFAULT: "CohereForAI/c4ai-command-r-v01-4bit",
+            DownloadSource.MODELSCOPE: "mirror013/c4ai-command-r-v01-4bit",
+        },
+        "CommandR-Plus-104B-4bit-Chat": {
+            DownloadSource.DEFAULT: "CohereForAI/c4ai-command-r-plus-4bit",
+        },
+    },
+    template="cohere",
 )
 
 
@@ -344,6 +379,23 @@ register_model_group(
         "Gemma-7B-Chat": {
             DownloadSource.DEFAULT: "google/gemma-7b-it",
             DownloadSource.MODELSCOPE: "AI-ModelScope/gemma-7b-it",
+        },
+    },
+    template="gemma",
+)
+
+
+register_model_group(
+    models={
+        "CodeGemma-2B": {
+            DownloadSource.DEFAULT: "google/codegemma-2b",
+        },
+        "CodeGemma-7B": {
+            DownloadSource.DEFAULT: "google/codegemma-7b",
+        },
+        "CodeGemma-7B-Chat": {
+            DownloadSource.DEFAULT: "google/codegemma-7b-it",
+            DownloadSource.MODELSCOPE: "AI-ModelScope/codegemma-7b-it",
         },
     },
     template="gemma",
@@ -663,6 +715,10 @@ register_model_group(
             DownloadSource.DEFAULT: "Qwen/Qwen1.5-14B",
             DownloadSource.MODELSCOPE: "qwen/Qwen1.5-14B",
         },
+        "Qwen1.5-32B": {
+            DownloadSource.DEFAULT: "Qwen/Qwen1.5-32B",
+            DownloadSource.MODELSCOPE: "qwen/Qwen1.5-32B",
+        },
         "Qwen1.5-72B": {
             DownloadSource.DEFAULT: "Qwen/Qwen1.5-72B",
             DownloadSource.MODELSCOPE: "qwen/Qwen1.5-72B",
@@ -690,6 +746,10 @@ register_model_group(
         "Qwen1.5-14B-Chat": {
             DownloadSource.DEFAULT: "Qwen/Qwen1.5-14B-Chat",
             DownloadSource.MODELSCOPE: "qwen/Qwen1.5-14B-Chat",
+        },
+        "Qwen1.5-32B-Chat": {
+            DownloadSource.DEFAULT: "Qwen/Qwen1.5-32B-Chat",
+            DownloadSource.MODELSCOPE: "qwen/Qwen1.5-32B-Chat",
         },
         "Qwen1.5-72B-Chat": {
             DownloadSource.DEFAULT: "Qwen/Qwen1.5-72B-Chat",
@@ -738,6 +798,10 @@ register_model_group(
         "Qwen1.5-14B-int4-Chat": {
             DownloadSource.DEFAULT: "Qwen/Qwen1.5-14B-Chat-AWQ",
             DownloadSource.MODELSCOPE: "qwen/Qwen1.5-14B-Chat-AWQ",
+        },
+        "Qwen1.5-32B-int4-Chat": {
+            DownloadSource.DEFAULT: "Qwen/Qwen1.5-32B-Chat-AWQ",
+            DownloadSource.MODELSCOPE: "qwen/Qwen1.5-32B-Chat-AWQ",
         },
         "Qwen1.5-72B-int8-Chat": {
             DownloadSource.DEFAULT: "Qwen/Qwen1.5-72B-Chat-GPTQ-Int8",
@@ -953,19 +1017,4 @@ register_model_group(
         },
     },
     template="zephyr",
-)
-
-
-register_model_group(
-    models={
-        "Atom-7B": {
-            DownloadSource.DEFAULT: "FlagAlpha/Atom-7B",
-            DownloadSource.MODELSCOPE: "FlagAlpha/Atom-7B",
-        },
-        "Atom-7B-Chat": {
-            DownloadSource.DEFAULT: "FlagAlpha/Atom-7B-Chat",
-            DownloadSource.MODELSCOPE: "FlagAlpha/Atom-7B-Chat",
-        },
-    },
-    template="atom",
 )
