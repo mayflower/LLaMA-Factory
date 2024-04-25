@@ -1,8 +1,7 @@
 #!/bin/bash
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch \
-    --config_file ../accelerate/single_config.yaml \
-    ../../src/train_bash.py \
+deepspeed --num_gpus 4 ../../src/train_bash.py \
+    --deepspeed ../deepspeed/ds_z3_config.json \
     --stage sft \
     --do_train \
     --model_name_or_path meta-llama/Llama-2-7b-hf \
@@ -25,7 +24,6 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch \
     --save_steps 100 \
     --eval_steps 100 \
     --evaluation_strategy steps \
-    --load_best_model_at_end \
     --learning_rate 5e-5 \
     --num_train_epochs 3.0 \
     --max_samples 3000 \

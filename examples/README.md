@@ -18,11 +18,12 @@ examples/
 │   └── aqlm.sh: Fine-tune 2-bit AQLM models using QLoRA
 ├── lora_multi_gpu/
 │   ├── single_node.sh: Fine-tune model with Accelerate on single node using LoRA
-│   └── multi_node.sh: Fine-tune model with Accelerate on multiple nodes using LoRA
+│   ├── multi_node.sh: Fine-tune model with Accelerate on multiple nodes using LoRA
+│   └── ds_zero3.sh: Fine-tune model with DeepSpeed ZeRO-3 using LoRA (weight sharding)
 ├── full_multi_gpu/
 │   ├── single_node.sh: Full fine-tune model with DeepSpeed on single node
 │   ├── multi_node.sh: Full fine-tune model with DeepSpeed on multiple nodes
-│   └── predict.sh: Do batch predict and compute BLEU and ROUGE scores after full tuning
+│   └── predict.sh: Do parallel batch predict and compute BLEU and ROUGE scores after full tuning
 ├── merge_lora/
 │   ├── merge.sh: Merge LoRA weights into the pre-trained models
 │   └── quantize.sh: Quantize the fine-tuned model with AutoGPTQ
@@ -38,6 +39,8 @@ examples/
     │   └── sft.sh: Fine-tune model with BAdam
     ├── loraplus/
     │   └── sft.sh: Fine-tune model using LoRA+
+    ├── mod/
+    │   └── sft.sh: Fine-tune model using Mixture-of-Depths
     ├── llama_pro/
     │   ├── expand.sh: Expand layers in the model
     │   └── sft.sh: Fine-tune the expanded model
