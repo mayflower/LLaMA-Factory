@@ -1,24 +1,30 @@
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, Optional, TypedDict
 
-from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoConfig, AutoModelForCausalLM, AutoModelForVision2Seq, AutoProcessor, AutoTokenizer
 from trl import AutoModelForCausalLMWithValueHead
 
 from ..extras.logging import get_logger
 from ..extras.misc import count_parameters, try_download_model_from_ms
 from .adapter import init_adapter
 from .patcher import patch_config, patch_model, patch_tokenizer, patch_valuehead_model
-from .utils.misc import load_valuehead_params, register_autoclass
+from .utils.misc import register_autoclass
 from .utils.mod import convert_pretrained_model_to_mod, load_mod_pretrained_model
 from .utils.unsloth import load_unsloth_pretrained_model
+from .utils.valuehead import load_valuehead_params
 
 
 if TYPE_CHECKING:
-    from transformers import PretrainedConfig, PreTrainedModel, PreTrainedTokenizer
+    from transformers import PretrainedConfig, PreTrainedModel, PreTrainedTokenizer, ProcessorMixin
 
     from ..hparams import FinetuningArguments, ModelArguments
 
 
 logger = get_logger(__name__)
+
+
+class TokenizerModule(TypedDict):
+    tokenizer: "PreTrainedTokenizer"
+    processor: Optional["ProcessorMixin"]
 
 
 def _get_init_kwargs(model_args: "ModelArguments") -> Dict[str, Any]:
@@ -36,7 +42,7 @@ def _get_init_kwargs(model_args: "ModelArguments") -> Dict[str, Any]:
     }
 
 
-def load_tokenizer(model_args: "ModelArguments") -> "PreTrainedTokenizer":
+def load_tokenizer(model_args: "ModelArguments") -> "TokenizerModule":
     r"""
     Loads pretrained tokenizer.
 
@@ -70,7 +76,14 @@ def load_tokenizer(model_args: "ModelArguments") -> "PreTrainedTokenizer":
             logger.warning("New tokens have been added, changed `resize_vocab` to True.")
 
     patch_tokenizer(tokenizer)
-    return tokenizer
+
+    if model_args.visual_inputs:
+        processor = AutoProcessor.from_pretrained(model_args.model_name_or_path, **init_kwargs)
+        setattr(processor, "tokenizer", tokenizer)
+    else:
+        processor = None
+
+    return {"tokenizer": tokenizer, "processor": processor}
 
 
 def load_config(model_args: "ModelArguments") -> "PretrainedConfig":
@@ -109,6 +122,8 @@ def load_model(
 
         if model_args.mixture_of_depths == "load":
             model = load_mod_pretrained_model(**init_kwargs)
+        elif model_args.visual_inputs:
+            model = AutoModelForVision2Seq.from_pretrained(**init_kwargs)
         else:
             model = AutoModelForCausalLM.from_pretrained(**init_kwargs)
 
@@ -116,7 +131,7 @@ def load_model(
             model = convert_pretrained_model_to_mod(model, config, model_args)
 
     if not lazy_load:
-        patch_model(model, tokenizer, model_args, is_trainable)
+        patch_model(model, tokenizer, model_args, is_trainable, add_valuehead)
         register_autoclass(config, model, tokenizer)
 
     model = init_adapter(config, model, model_args, finetuning_args, is_trainable)

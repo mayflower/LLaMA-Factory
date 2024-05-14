@@ -81,6 +81,10 @@ class ModelArguments:
         default=False,
         metadata={"help": "Whether or not to use unsloth's optimization for the LoRA training."},
     )
+    visual_inputs: bool = field(
+        default=False,
+        metadata={"help": "Whethor or not to use multimodal LLM that accepts visual inputs."},
+    )
     moe_aux_loss_coef: Optional[float] = field(
         default=None,
         metadata={"help": "Coefficient of the auxiliary router loss in mixture-of-experts model."},
@@ -139,7 +143,7 @@ class ModelArguments:
     )
     export_device: str = field(
         default="cpu",
-        metadata={"help": "The device used in model export."},
+        metadata={"help": "The device used in model export, use cuda to avoid addmm errors."},
     )
     export_quantization_bit: Optional[int] = field(
         default=None,
@@ -177,6 +181,9 @@ class ModelArguments:
 
         if self.split_special_tokens and self.use_fast_tokenizer:
             raise ValueError("`split_special_tokens` is only supported for slow tokenizers.")
+
+        if self.visual_inputs and self.use_unsloth:
+            raise ValueError("Unsloth does not support MLLM yet. Stay tuned.")
 
         if self.adapter_name_or_path is not None:  # support merging multiple lora weights
             self.adapter_name_or_path = [path.strip() for path in self.adapter_name_or_path.split(",")]

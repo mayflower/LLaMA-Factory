@@ -3,7 +3,6 @@
 # Usage: python length_cdf.py --model_name_or_path path_to_model --dataset alpaca_en --template default
 
 from collections import defaultdict
-from typing import Optional
 
 import fire
 from tqdm import tqdm
@@ -15,10 +14,10 @@ from llmtuner.model import load_tokenizer
 
 def length_cdf(
     model_name_or_path: str,
-    dataset: Optional[str] = "alpaca_en",
-    dataset_dir: Optional[str] = "data",
-    template: Optional[str] = "default",
-    interval: Optional[int] = 1000,
+    dataset: str = "alpaca_en",
+    dataset_dir: str = "data",
+    template: str = "default",
+    interval: int = 1000,
 ):
     model_args, data_args, training_args, _, _ = get_train_args(
         dict(
@@ -32,8 +31,8 @@ def length_cdf(
             overwrite_cache=True,
         )
     )
-    tokenizer = load_tokenizer(model_args)
-    trainset = get_dataset(tokenizer, model_args, data_args, training_args, stage="sft")
+    tokenizer_module = load_tokenizer(model_args)
+    trainset = get_dataset(model_args, data_args, training_args, stage="sft", **tokenizer_module)
     total_num = len(trainset)
     length_dict = defaultdict(int)
     for sample in tqdm(trainset["input_ids"]):

@@ -1,4 +1,4 @@
-如果您使用自定义数据集，请务必在 `dataset_info.json` 文件中按照以下格式提供数据集定义。
+如果您使用自定义数据集，请务必按照以下格式在 `dataset_info.json` 文件中添加**数据集描述**。我们在下面也提供了一些例子。
 
 ```json
 "数据集名称": {
@@ -18,7 +18,8 @@
     "history": "数据集代表历史对话的表头名称（默认：None）",
     "messages": "数据集代表消息列表的表头名称（默认：conversations）",
     "system": "数据集代表系统提示的表头名称（默认：None）",
-    "tools": "数据集代表工具描述的表头名称（默认：None）"
+    "tools": "数据集代表工具描述的表头名称（默认：None）",
+    "images": "数据集代表图像输入的表头名称（默认：None）"
   },
   "tags（可选，用于 sharegpt 格式）": {
     "role_tag": "消息中代表发送者身份的键名（默认：from）",
@@ -32,7 +33,7 @@
 }
 ```
 
-添加后可通过指定 `--dataset 数据集名称` 参数使用自定义数据集。
+然后，可通过使用 `--dataset 数据集名称` 参数加载自定义数据集。
 
 ----
 
@@ -53,10 +54,11 @@
 ]
 ```
 
-对于上述格式的数据，`dataset_info.json` 中的 `columns` 应为：
+对于上述格式的数据，`dataset_info.json` 中的描述应为：
 
 ```json
 "数据集名称": {
+  "file_name": "data.json",
   "columns": {
     "prompt": "instruction",
     "query": "input",
@@ -69,28 +71,60 @@
 
 其中 `query` 列对应的内容会与 `prompt` 列对应的内容拼接后作为用户指令，即用户指令为 `prompt\nquery`。`response` 列对应的内容为模型回答。
 
-`system` 列对应的内容将被作为系统提示词。`history` 列是由多个字符串二元组构成的列表，分别代表历史消息中每轮的指令和回答。注意历史消息中的回答**也会被用于训练**。
+`system` 列对应的内容将被作为系统提示词。`history` 列是由多个字符串二元组构成的列表，分别代表历史消息中每轮的指令和回答。注意在指令监督学习时，历史消息中的回答**也会被用于训练**。
 
-对于预训练数据集，仅 `prompt` 列中的内容会用于模型训练。
-
-对于偏好数据集，`response` 列应当是一个长度为 2 的字符串列表，排在前面的代表更优的回答，例如：
+对于**预训练数据集**，仅 `prompt` 列中的内容会用于模型训练，例如：
 
 ```json
-{
-  "instruction": "用户指令",
-  "input": "用户输入",
-  "output": [
-    "优质回答",
-    "劣质回答"
-  ]
+[
+  {"text": "document"},
+  {"text": "document"}
+]
+```
+
+对于上述格式的数据，`dataset_info.json` 中的描述应为：
+
+```json
+"数据集名称": {
+  "file_name": "data.json",
+  "columns": {
+    "prompt": "text"
+  }
 }
 ```
 
-添加偏好数据集需要额外指定 `"ranking": true`。
+对于**偏好数据集**，`response` 列应当是一个长度为 2 的字符串列表，排在前面的代表更优的回答，例如：
+
+```json
+[
+  {
+    "instruction": "用户指令",
+    "input": "用户输入",
+    "output": [
+      "优质回答",
+      "劣质回答"
+    ]
+  }
+]
+```
+
+对于上述格式的数据，`dataset_info.json` 中的描述应为：
+
+```json
+"数据集名称": {
+  "file_name": "data.json",
+  "ranking": true,
+  "columns": {
+    "prompt": "instruction",
+    "query": "input",
+    "response": "output",
+  }
+}
+```
 
 ----
 
-而 sharegpt 格式的数据集按照以下方式组织：
+而 **sharegpt** 格式的数据集按照以下方式组织：
 
 ```json
 [
@@ -111,10 +145,12 @@
 ]
 ```
 
-对于上述格式的数据，`dataset_info.json` 中的 `columns` 应为：
+对于上述格式的数据，`dataset_info.json` 中的描述应为：
 
 ```json
 "数据集名称": {
+  "file_name": "data.json",
+  "formatting": "sharegpt",
   "columns": {
     "messages": "conversations",
     "system": "system",
@@ -131,4 +167,46 @@
 
 其中 `messages` 列应当是一个列表，且符合 `用户/模型/用户/模型/用户/模型` 的顺序。
 
-预训练数据集和偏好数据集尚不支持 sharegpt 格式。
+我们同样支持 **openai** 格式的数据集：
+
+```json
+[
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "系统提示词（选填）"
+      },
+      {
+        "role": "user",
+        "content": "用户指令"
+      },
+      {
+        "role": "assistant",
+        "content": "模型回答"
+      }
+    ]
+  }
+]
+```
+
+对于上述格式的数据，`dataset_info.json` 中的描述应为：
+
+```json
+"数据集名称": {
+  "file_name": "data.json",
+  "formatting": "sharegpt",
+  "columns": {
+    "messages": "messages"
+  },
+  "tags": {
+    "role_tag": "role",
+    "content_tag": "content",
+    "user_tag": "user",
+    "assistant_tag": "assistant",
+    "system_tag": "system"
+  }
+}
+```
+
+预训练数据集和偏好数据集**尚不支持** sharegpt 格式。

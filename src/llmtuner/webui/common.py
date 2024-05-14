@@ -4,17 +4,20 @@ from collections import defaultdict
 from typing import Any, Dict, Optional
 
 from peft.utils import SAFETENSORS_WEIGHTS_NAME, WEIGHTS_NAME
+from yaml import safe_dump, safe_load
 
 from ..extras.constants import (
     DATA_CONFIG,
     DEFAULT_MODULE,
     DEFAULT_TEMPLATE,
+    MLLM_LIST,
     PEFT_METHODS,
     STAGES_USE_PAIR_DATA,
     SUPPORTED_MODELS,
     TRAINING_STAGES,
     DownloadSource,
 )
+from ..extras.logging import get_logger
 from ..extras.misc import use_modelscope
 from ..extras.packages import is_gradio_available
 
@@ -23,12 +26,15 @@ if is_gradio_available():
     import gradio as gr
 
 
+logger = get_logger(__name__)
+
+
 ADAPTER_NAMES = {WEIGHTS_NAME, SAFETENSORS_WEIGHTS_NAME}
 DEFAULT_CACHE_DIR = "cache"
 DEFAULT_CONFIG_DIR = "config"
 DEFAULT_DATA_DIR = "data"
 DEFAULT_SAVE_DIR = "saves"
-USER_CONFIG = "user.config"
+USER_CONFIG = "user_config.yaml"
 
 
 def get_save_dir(*args) -> os.PathLike:
@@ -46,7 +52,7 @@ def get_save_path(config_path: str) -> os.PathLike:
 def load_config() -> Dict[str, Any]:
     try:
         with open(get_config_path(), "r", encoding="utf-8") as f:
-            return json.load(f)
+            return safe_load(f)
     except Exception:
         return {"lang": None, "last_model": None, "path_dict": {}, "cache_dir": None}
 
@@ -59,13 +65,13 @@ def save_config(lang: str, model_name: Optional[str] = None, model_path: Optiona
         user_config["last_model"] = model_name
         user_config["path_dict"][model_name] = model_path
     with open(get_config_path(), "w", encoding="utf-8") as f:
-        json.dump(user_config, f, indent=2, ensure_ascii=False)
+        safe_dump(user_config, f)
 
 
 def load_args(config_path: str) -> Optional[Dict[str, Any]]:
     try:
         with open(get_save_path(config_path), "r", encoding="utf-8") as f:
-            return json.load(f)
+            return safe_load(f)
     except Exception:
         return None
 
@@ -73,7 +79,7 @@ def load_args(config_path: str) -> Optional[Dict[str, Any]]:
 def save_args(config_path: str, config_dict: Dict[str, Any]) -> str:
     os.makedirs(DEFAULT_CONFIG_DIR, exist_ok=True)
     with open(get_save_path(config_path), "w", encoding="utf-8") as f:
-        json.dump(config_dict, f, indent=2, ensure_ascii=False)
+        safe_dump(config_dict, f)
 
     return str(get_save_path(config_path))
 
@@ -105,6 +111,10 @@ def get_template(model_name: str) -> str:
     return "default"
 
 
+def get_visual(model_name: str) -> bool:
+    return get_prefix(model_name) in MLLM_LIST
+
+
 def list_adapters(model_name: str, finetuning_type: str) -> "gr.Dropdown":
     if finetuning_type not in PEFT_METHODS:
         return gr.Dropdown(value=[], choices=[], interactive=False)
@@ -122,11 +132,15 @@ def list_adapters(model_name: str, finetuning_type: str) -> "gr.Dropdown":
 
 
 def load_dataset_info(dataset_dir: str) -> Dict[str, Dict[str, Any]]:
+    if dataset_dir == "ONLINE":
+        logger.info("dataset_dir is ONLINE, using online dataset.")
+        return {}
+
     try:
         with open(os.path.join(dataset_dir, DATA_CONFIG), "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception as err:
-        print("Cannot open {} due to {}.".format(os.path.join(dataset_dir, DATA_CONFIG), str(err)))
+        logger.warning("Cannot open {} due to {}.".format(os.path.join(dataset_dir, DATA_CONFIG), str(err)))
         return {}
 
 

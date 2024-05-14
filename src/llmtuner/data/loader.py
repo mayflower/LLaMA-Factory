@@ -1,6 +1,6 @@
 import inspect
 import os
-from typing import TYPE_CHECKING, Literal, Union
+from typing import TYPE_CHECKING, Literal, Optional, Union
 
 from datasets import load_dataset, load_from_disk
 
@@ -11,12 +11,12 @@ from .aligner import align_dataset
 from .parser import get_dataset_list
 from .preprocess import get_preprocess_and_print_func
 from .template import get_template_and_fix_tokenizer
-from .utils import checksum, merge_dataset
+from .utils import merge_dataset
 
 
 if TYPE_CHECKING:
     from datasets import Dataset, IterableDataset
-    from transformers import Seq2SeqTrainingArguments
+    from transformers import ProcessorMixin, Seq2SeqTrainingArguments
     from transformers.tokenization_utils import PreTrainedTokenizer
 
     from ..hparams import DataArguments, ModelArguments
@@ -61,8 +61,6 @@ def load_single_dataset(
 
         if data_path is None:
             raise ValueError("File extension must be txt, csv, json or jsonl.")
-
-        checksum(data_files, dataset_attr.file_sha1)
     else:
         raise NotImplementedError
 
@@ -115,11 +113,12 @@ def load_single_dataset(
 
 
 def get_dataset(
-    tokenizer: "PreTrainedTokenizer",
     model_args: "ModelArguments",
     data_args: "DataArguments",
     training_args: "Seq2SeqTrainingArguments",
     stage: Literal["pt", "sft", "rm", "ppo"],
+    tokenizer: "PreTrainedTokenizer",
+    processor: Optional["ProcessorMixin"] = None,
 ) -> Union["Dataset", "IterableDataset"]:
     template = get_template_and_fix_tokenizer(tokenizer, data_args.template)
     if data_args.train_on_prompt and template.efficient_eos:
@@ -149,7 +148,7 @@ def get_dataset(
 
     with training_args.main_process_first(desc="pre-process dataset"):
         preprocess_func, print_function = get_preprocess_and_print_func(
-            tokenizer, template, data_args, training_args, stage
+            data_args, training_args, stage, template, tokenizer, processor
         )
         column_names = list(next(iter(dataset)).keys())
         kwargs = {}

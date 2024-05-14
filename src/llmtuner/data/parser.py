@@ -21,13 +21,13 @@ class DatasetAttr:
     load_from: Literal["hf_hub", "ms_hub", "script", "file"]
     dataset_name: str
     """ extra configs """
-    file_sha1: Optional[str] = None
     subset: Optional[str] = None
     folder: Optional[str] = None
     ranking: bool = False
     formatting: Literal["alpaca", "sharegpt"] = "alpaca"
     """ columns """
     system: Optional[str] = None
+    images: Optional[str] = None
     """ columns for the alpaca format """
     prompt: Optional[str] = "instruction"
     query: Optional[str] = "input"
@@ -98,14 +98,13 @@ def get_dataset_list(data_args: "DataArguments") -> List["DatasetAttr"]:
         else:
             dataset_attr = DatasetAttr("file", dataset_name=dataset_info[name]["file_name"])
 
-        dataset_attr.set_attr("file_sha1", dataset_info[name])
         dataset_attr.set_attr("subset", dataset_info[name])
         dataset_attr.set_attr("folder", dataset_info[name])
         dataset_attr.set_attr("ranking", dataset_info[name], default=False)
         dataset_attr.set_attr("formatting", dataset_info[name], default="alpaca")
 
         if "columns" in dataset_info[name]:
-            column_names = ["system"]
+            column_names = ["system", "images"]
             if dataset_attr.formatting == "alpaca":
                 column_names.extend(["prompt", "query", "response", "history"])
             else:

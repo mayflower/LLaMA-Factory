@@ -17,22 +17,28 @@ if TYPE_CHECKING:
 
 def create_chat_box(
     engine: "Engine", visible: bool = False
-) -> Tuple["gr.Column", "Component", "Component", Dict[str, "Component"]]:
+) -> Tuple["Component", "Component", Dict[str, "Component"]]:
     with gr.Column(visible=visible) as chat_box:
         chatbot = gr.Chatbot(show_copy_button=True)
         messages = gr.State([])
         with gr.Row():
             with gr.Column(scale=4):
-                role = gr.Dropdown(choices=[Role.USER.value, Role.OBSERVATION.value], value=Role.USER.value)
-                system = gr.Textbox(show_label=False)
-                tools = gr.Textbox(show_label=False, lines=2)
+                with gr.Row():
+                    with gr.Column():
+                        role = gr.Dropdown(choices=[Role.USER.value, Role.OBSERVATION.value], value=Role.USER.value)
+                        system = gr.Textbox(show_label=False)
+                        tools = gr.Textbox(show_label=False, lines=3)
+
+                    with gr.Column() as image_box:
+                        image = gr.Image(sources=["upload"], type="numpy")
+
                 query = gr.Textbox(show_label=False, lines=8)
                 submit_btn = gr.Button(variant="primary")
 
             with gr.Column(scale=1):
-                max_new_tokens = gr.Slider(8, 4096, value=512, step=1)
-                top_p = gr.Slider(0.01, 1.0, value=0.7, step=0.01)
-                temperature = gr.Slider(0.01, 1.5, value=0.95, step=0.01)
+                max_new_tokens = gr.Slider(minimum=8, maximum=4096, value=512, step=1)
+                top_p = gr.Slider(minimum=0.01, maximum=1.0, value=0.7, step=0.01)
+                temperature = gr.Slider(minimum=0.01, maximum=1.5, value=0.95, step=0.01)
                 clear_btn = gr.Button()
 
     tools.input(check_json_schema, inputs=[tools, engine.manager.get_elem_by_id("top.lang")])
@@ -43,19 +49,21 @@ def create_chat_box(
         [chatbot, messages, query],
     ).then(
         engine.chatter.stream,
-        [chatbot, messages, system, tools, max_new_tokens, top_p, temperature],
+        [chatbot, messages, system, tools, image, max_new_tokens, top_p, temperature],
         [chatbot, messages],
     )
     clear_btn.click(lambda: ([], []), outputs=[chatbot, messages])
 
     return (
-        chat_box,
         chatbot,
         messages,
         dict(
+            chat_box=chat_box,
             role=role,
             system=system,
             tools=tools,
+            image_box=image_box,
+            image=image,
             query=query,
             submit_btn=submit_btn,
             max_new_tokens=max_new_tokens,

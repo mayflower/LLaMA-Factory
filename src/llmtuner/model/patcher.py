@@ -12,9 +12,11 @@ from .utils.attention import configure_attn_implementation, print_attn_implement
 from .utils.checkpointing import prepare_model_for_training
 from .utils.embedding import resize_embedding_layer
 from .utils.longlora import configure_longlora
-from .utils.moe import add_z3_leaf_module
+from .utils.moe import add_z3_leaf_module, configure_moe
 from .utils.quantization import configure_quantization
 from .utils.rope import configure_rope
+from .utils.valuehead import prepare_valuehead_model
+from .utils.visual import autocast_projector_dtype, configure_hidden_size
 
 
 if TYPE_CHECKING:
@@ -46,16 +48,12 @@ def patch_config(
     configure_rope(config, model_args, is_trainable)
     configure_longlora(config, model_args, is_trainable)
     configure_quantization(config, tokenizer, model_args, init_kwargs)
+    configure_moe(config, model_args, is_trainable)
+    configure_hidden_size(config)
 
     if model_args.use_cache and not is_trainable:
         setattr(config, "use_cache", True)
         logger.info("Using KV cache for faster generation.")
-
-    if model_args.moe_aux_loss_coef is not None:
-        if getattr(config, "model_type", None) in ["mixtral", "qwen2_moe"]:
-            setattr(config, "router_aux_loss_coef", model_args.moe_aux_loss_coef)
-        elif getattr(config, "model_type", None) == "deepseek":
-            setattr(config, "aux_loss_alpha", model_args.moe_aux_loss_coef)
 
     if getattr(config, "model_type", None) == "qwen":
         setattr(config, "use_flash_attn", model_args.flash_attn)
@@ -64,9 +62,6 @@ def patch_config(
 
     if getattr(config, "model_type", None) == "qwen2" and is_trainable and model_args.flash_attn:
         setattr(config, "use_cache", False)  # qwen2 does not support use_cache when using flashattn
-
-    if getattr(config, "model_type", None) in ["mixtral", "qwen2_moe"] and is_trainable:
-        setattr(config, "output_router_logits", True)
 
     init_kwargs["torch_dtype"] = model_args.compute_dtype
     if not is_deepspeed_zero3_enabled():
@@ -80,7 +75,11 @@ def patch_config(
 
 
 def patch_model(
-    model: "PreTrainedModel", tokenizer: "PreTrainedTokenizer", model_args: "ModelArguments", is_trainable: bool
+    model: "PreTrainedModel",
+    tokenizer: "PreTrainedTokenizer",
+    model_args: "ModelArguments",
+    is_trainable: bool,
+    add_valuehead: bool,
 ) -> None:
     gen_config = model.generation_config  # check and fix generation config
     if not gen_config.do_sample and (
@@ -93,12 +92,14 @@ def patch_model(
     if "GenerationMixin" not in str(model.generate.__func__):
         model.generate = MethodType(PreTrainedModel.generate, model)
 
-    if is_trainable and getattr(model.config, "model_type", None) == "chatglm":
-        setattr(model, "lm_head", model.transformer.output_layer)
-        setattr(model, "_keys_to_ignore_on_save", ["lm_head.weight"])
+    if add_valuehead:
+        prepare_valuehead_model(model)
 
     if model_args.resize_vocab:
         resize_embedding_layer(model, tokenizer)
+
+    if model_args.visual_inputs:
+        autocast_projector_dtype(model, model_args)
 
     if is_trainable:
         prepare_model_for_training(model, model_args)

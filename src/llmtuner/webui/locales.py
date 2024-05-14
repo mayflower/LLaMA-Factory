@@ -129,6 +129,17 @@ LOCALES = {
             "label": "加速方式",
         },
     },
+    "visual_inputs": {
+        "en": {
+            "label": "Visual inputs",
+        },
+        "ru": {
+            "label": "визуальные входы",
+        },
+        "zh": {
+            "label": "图像输入",
+        },
+    },
     "training_stage": {
         "en": {
             "label": "Stage",
@@ -880,6 +891,87 @@ LOCALES = {
             "info": "应用 GaLore 的模块名称。使用英文逗号分隔多个名称。",
         },
     },
+    "badam_tab": {
+        "en": {
+            "label": "BAdam configurations",
+        },
+        "ru": {
+            "label": "Конфигурации BAdam",
+        },
+        "zh": {
+            "label": "BAdam 参数设置",
+        },
+    },
+    "use_badam": {
+        "en": {
+            "label": "Use BAdam",
+            "info": "Enable the BAdam optimizer.",
+        },
+        "ru": {
+            "label": "Использовать BAdam",
+            "info": "Включите оптимизатор BAdam.",
+        },
+        "zh": {
+            "label": "使用 BAdam",
+            "info": "使用 BAdam 优化器。",
+        },
+    },
+    "badam_mode": {
+        "en": {
+            "label": "BAdam mode",
+            "info": "Whether to use layer-wise or ratio-wise BAdam optimizer.",
+        },
+        "ru": {
+            "label": "Режим BAdam",
+            "info": "Использовать ли оптимизатор BAdam с послоевой или пропорциональной настройкой.",
+        },
+        "zh": {
+            "label": "BAdam 模式",
+            "info": "使用 layer-wise 或 ratio-wise BAdam 优化器。",
+        },
+    },
+    "badam_switch_mode": {
+        "en": {
+            "label": "Switch mode",
+            "info": "The strategy of picking block to update for layer-wise BAdam.",
+        },
+        "ru": {
+            "label": "Режим переключения",
+            "info": "Стратегия выбора блока для обновления для послойного BAdam.",
+        },
+        "zh": {
+            "label": "切换策略",
+            "info": "Layer-wise BAdam 优化器的块切换策略。",
+        },
+    },
+    "badam_switch_interval": {
+        "en": {
+            "label": "Switch interval",
+            "info": "Number of steps to update the block for layer-wise BAdam.",
+        },
+        "ru": {
+            "label": "Интервал переключения",
+            "info": "количество шагов для обновления блока для пошагового BAdam.",
+        },
+        "zh": {
+            "label": "切换频率",
+            "info": "Layer-wise BAdam 优化器的块切换频率。",
+        },
+    },
+    "badam_update_ratio": {
+        "en": {
+            "label": "Update ratio",
+            "info": "The ratio of the update for ratio-wise BAdam.",
+        },
+        "ru": {
+            "label": "Коэффициент обновления",
+            "info": "Коэффициент обновления для BAdam с учётом соотношений.",
+        },
+        "zh": {
+            "label": "Block 更新比例",
+            "info": "Ratio-wise BAdam 优化器的更新比例。",
+        },
+    },
     "cmd_preview_btn": {
         "en": {
             "value": "Preview command",
@@ -1073,6 +1165,17 @@ LOCALES = {
             "placeholder": "工具列表（非必填）",
         },
     },
+    "image": {
+        "en": {
+            "label": "Image (optional)",
+        },
+        "ru": {
+            "label": "Изображение (по желанию)",
+        },
+        "zh": {
+            "label": "图像（非必填）",
+        },
+    },
     "query": {
         "en": {
             "placeholder": "Input...",
@@ -1150,7 +1253,7 @@ LOCALES = {
             "value": "清空历史",
         },
     },
-    "max_shard_size": {
+    "export_size": {
         "en": {
             "label": "Max shard size (GB)",
             "info": "The maximum size for a model file.",
@@ -1190,6 +1293,20 @@ LOCALES = {
         "zh": {
             "label": "导出量化数据集",
             "info": "量化过程中使用的校准数据集。",
+        },
+    },
+    "export_device": {
+        "en": {
+            "label": "Export device",
+            "info": "Which device should be used to export model.",
+        },
+        "ru": {
+            "label": "Экспорт устройство",
+            "info": "Какое устройство следует использовать для экспорта модели.",
+        },
+        "zh": {
+            "label": "导出设备",
+            "info": "导出模型使用的设备类型。",
         },
     },
     "export_legacy_format": {
@@ -1287,7 +1404,12 @@ ALERTS = {
     "err_no_export_dir": {
         "en": "Please provide export dir.",
         "ru": "Пожалуйста, укажите каталог для экспорта.",
-        "zh": "请填写导出目录",
+        "zh": "请填写导出目录。",
+    },
+    "err_gptq_lora": {
+        "en": "Please merge adapters before quantizing the model.",
+        "ru": "Пожалуйста, объедините адаптеры перед квантованием модели.",
+        "zh": "量化模型前请先合并适配器。",
     },
     "err_failed": {
         "en": "Failed.",
@@ -1327,7 +1449,7 @@ ALERTS = {
     "info_aborting": {
         "en": "Aborted, wait for terminating...",
         "ru": "Прервано, ожидание завершения...",
-        "zh": "训练中断，正在等待线程结束……",
+        "zh": "训练中断，正在等待进程结束……",
     },
     "info_aborted": {
         "en": "Ready.",
